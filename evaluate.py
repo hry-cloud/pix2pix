@@ -2,6 +2,11 @@ import numpy as np
 import math
 import skimage
 from PIL import Image
+from keras.models import load_model
+from numpy import load
+from numpy import vstack
+from matplotlib import pyplot
+from numpy.random import randint
 
 # 计算峰值信噪比PSNR
 def PSNR(img1, img2):
@@ -26,7 +31,7 @@ def SSIM(y_true, y_pred):
 
 # 计算语义分割的各个指标
 """
-# 注意：混淆矩阵横列代表预测值，竖列代表真实值
+混淆矩阵横列代表预测值，竖列代表真实值
 confusionMetric  
 P\L     P    N
 P      TP    FP
@@ -94,13 +99,60 @@ class SegmentationMetric(object):
     def reset(self):
         self.confusionMatrix = np.zeros((self.numClass, self.numClass))
 
+# 加载验证集的图像
+def load_real_samples(filename):
+	# 加载压缩数组
+	data = load(filename)
+	# 将数组分开，也即分为两张图像
+	X1, X2 = data['arr_0'], data['arr_1']
+	# 像素值从[0,255]转换为[-1,1]
+	X1 = (X1 - 127.5) / 127.5
+	X2 = (X2 - 127.5) / 127.5
+	return [X1, X2]
+
+# 绘制源图像、生成图像以及目标图像
+def plot_images(src_img, gen_img, tar_img):
+	images = vstack((src_img, gen_img, tar_img))
+	# 将元素值从[-1,1]改为[0,1]
+	images = (images + 1) / 2.0
+	titles = ['Source', 'Generated', 'Expected']
+	# 一列一列地作图
+	for i in range(len(images)):
+		pyplot.subplot(1, 3, 1 + i)
+		pyplot.axis('off')
+		pyplot.imshow(images[i])
+		pyplot.title(titles[i])
+	pyplot.show()
+
+# 加载数据
+[X1, X2] = load_real_samples('maps_val_256.npz')
+print('Loaded', X1.shape, X2.shape)
+# 加载模型
+model = load_model('model_010960.h5')
+# 随机选择样例
+ix = randint(0, len(X1), 1)
+src_image, tar_image = X1[ix], X2[ix]
+# 利用源图像生成图像
+gen_image = model.predict(src_image)
+# 绘制三张图像
+plot_images(src_image, gen_image, tar_image)
+
+'''
 # 载入图像，化为灰度图并转换成numpy数组形式
 im1 = np.array(Image.open("des.jpg").convert('L'))
 im2 = np.array(Image.open("out.jpg").convert('L'))
+'''
+# 将元素值恢复为[0,255]
+im1 = gen_image[0] * 127.5 + 127.5
+im2 = tar_image[0] * 127.5 + 127.5
+im1 = im1.astype(np.uint8)
+im2 = im2.astype(np.uint8)
+#print(im1.shape)
+#print(im2.shape)
 
 # 获取PSNR和SSIM两个指标
 psnr = skimage.measure.compare_psnr(im1, im2, 255)
-ssim = skimage.measure.compare_ssim(im1, im2, data_range=255)
+ssim = skimage.measure.compare_ssim(im1, im2, data_range=255, multichannel=True)
 
 print(psnr)
 print(ssim)
@@ -116,7 +168,7 @@ MPA = metric.meanPixelAccuracy()
 MIOU = metric.meanIntersectionOverUnion()
 
 print('PA is : %f' % PA)
-print('CPA is :') # 列表
-print(CPA)
+#print('CPA is :') # 列表
+#print(CPA)
 print('MPA is : %f' % MPA)
 print('MIOU is : %f' % MIOU)

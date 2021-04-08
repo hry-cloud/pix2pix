@@ -21,11 +21,11 @@ def load_images(path, size=(256,512)):
 	return [asarray(src_list), asarray(tar_list)]
 
 # 数据集路径
-path = 'maps/train/'
+path = 'F:/datasets/maps/val/'
 # 加载数据集
 [src_images, tar_images] = load_images(path)
 print('Loaded: ', src_images.shape, tar_images.shape)
 # 保存为压缩的numpy数组
-filename = 'maps_256.npz'
+filename = 'maps_val_256.npz'
 savez_compressed(filename, src_images, tar_images)
 print('Saved dataset: ', filename)
