@@ -146,7 +146,7 @@ def load_real_samples(filename):
 	# 将尺寸由[0,255]变为[-1,1]，也即归一化
 	X1 = (X1 - 127.5) / 127.5
 	X2 = (X2 - 127.5) / 127.5
-	return [X2, X1]
+	return [X1, X2]
 
 # 从样本中随机选择一批图像，返回图像对以及对应的分类标签
 def generate_real_samples(dataset, n_samples, patch_shape):
@@ -194,15 +194,15 @@ def summarize_performance(step, g_model, dataset, n_samples=3):
 		pyplot.axis('off')
 		pyplot.imshow(X_realB[i])
 	# 将绘制的图保存到文件
-	filename1 = 'rev_plot_%06d.png' % (step+1)
+	filename1 = 'plot_%06d.png' % (step+1)
 	pyplot.savefig(filename1)
 	pyplot.close()
 	# 保存生成器模型
-	filename2 = 'rev_g_model_%06d.h5' % (step+1)
+	filename2 = 'g_model_%06d.h5' % (step+1)
 	g_model.save(filename2)
-	filename3 = 'rev_d_model_%06d.h5' % (step+1)
-	d_model.save(filename3)
-	print('>Saved: %s and %s and %s' % (filename1, filename2, filename3))
+	# filename3 = 'd_model_%06d.h5' % (step+1)
+	# d_model.save(filename3)
+	print('>Saved: %s and %s' % (filename1, filename2))
 
 # 训练pix2pix模型
 def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
@@ -233,14 +233,14 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 			summarize_performance(i, g_model, dataset)
 
 # 加载图像数据
-dataset = load_real_samples('maps_256.npz')
+dataset = load_real_samples('maps_train_256.npz')
 print('Loaded', dataset[0].shape, dataset[1].shape)
 # 基于加载的数据集来定义输入的形状
 image_shape = dataset[0].shape[1:]
 # 定义模型
 load_from_checkpoint = False
-d_model_file = "rev_d_modle_010960.h5"
-g_model_file = "rev_g_modle_010960.h5"
+d_model_file = "d_modle_010960.h5"
+g_model_file = "g_modle_010960.h5"
 if load_from_checkpoint:
 	d_model = load_model(d_model_file)
 	g_model = load_model(g_model_file)

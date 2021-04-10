@@ -101,14 +101,14 @@ class SegmentationMetric(object):
 
 # 加载验证集的图像
 def load_real_samples(filename):
-	# 加载压缩数组
-	data = load(filename)
-	# 将数组分开，也即分为两张图像
-	X1, X2 = data['arr_0'], data['arr_1']
-	# 像素值从[0,255]转换为[-1,1]
-	X1 = (X1 - 127.5) / 127.5
-	X2 = (X2 - 127.5) / 127.5
-	return [X1, X2]
+    # 加载压缩数组
+    data = load(filename)
+    # 将数组分开，也即分为两张图像
+    X1, X2 = data['arr_0'], data['arr_1']
+    # 像素值从[0,255]转换为[-1,1]
+    X1 = (X1 - 127.5) / 127.5
+    X2 = (X2 - 127.5) / 127.5
+    return [X1, X2]
 
 # 绘制源图像、生成图像以及目标图像
 def plot_images(src_img, gen_img, tar_img):
@@ -128,7 +128,7 @@ def plot_images(src_img, gen_img, tar_img):
 [X1, X2] = load_real_samples('maps_val_256.npz')
 print('Loaded', X1.shape, X2.shape)
 # 加载模型
-model = load_model('model_010960.h5')
+model = load_model('model_087680.h5')
 # 随机选择样例
 ix = randint(0, len(X1), 1)
 src_image, tar_image = X1[ix], X2[ix]
@@ -147,8 +147,8 @@ im1 = gen_image[0] * 127.5 + 127.5
 im2 = tar_image[0] * 127.5 + 127.5
 im1 = im1.astype(np.uint8)
 im2 = im2.astype(np.uint8)
-#print(im1.shape)
-#print(im2.shape)
+# print(im1.shape)
+# print(im2.shape)
 
 # 获取PSNR和SSIM两个指标
 psnr = skimage.measure.compare_psnr(im1, im2, 255)
@@ -168,7 +168,7 @@ MPA = metric.meanPixelAccuracy()
 MIOU = metric.meanIntersectionOverUnion()
 
 print('PA is : %f' % PA)
-#print('CPA is :') # 列表
-#print(CPA)
+# print('CPA is :') # 列表
+# print(CPA)
 print('MPA is : %f' % MPA)
 print('MIOU is : %f' % MIOU)
