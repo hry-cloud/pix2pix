@@ -125,10 +125,10 @@ def plot_images(src_img, gen_img, tar_img):
 	pyplot.show()
 
 # 加载数据
-[X1, X2] = load_real_samples('maps_val_256.npz')
+[X2, X1] = load_real_samples('maps_val_256.npz')
 print('Loaded', X1.shape, X2.shape)
 # 加载模型
-model = load_model('model_087680.h5')
+model = load_model('rev_model_054800.h5')
 # 随机选择样例
 ix = randint(0, len(X1), 1)
 src_image, tar_image = X1[ix], X2[ix]
