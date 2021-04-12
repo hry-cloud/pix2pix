@@ -1,4 +1,3 @@
-# example of defining a 70x70 patchgan discriminator model
 from keras.optimizers import Adam
 from keras.initializers import RandomNormal
 from keras.models import Model
