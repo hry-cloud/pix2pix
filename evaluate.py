@@ -124,51 +124,75 @@ def plot_images(src_img, gen_img, tar_img):
 		pyplot.title(titles[i])
 	pyplot.show()
 
+# 定义变量用于统计各个指标的累加和，从而最终得到平均值
+avg_PSNR = 0.0
+avg_SSIM = 0.0
+avg_PA   = 0.0
+avg_MPA  = 0.0
+avg_MIOU = 0.0
+
 # 加载数据
 [X2, X1] = load_real_samples('maps_val_256.npz')
 print('Loaded', X1.shape, X2.shape)
+num = len(X1)
 # 加载模型
-model = load_model('rev_model_054800.h5')
-# 随机选择样例
-ix = randint(0, len(X1), 1)
-src_image, tar_image = X1[ix], X2[ix]
-# 利用源图像生成图像
-gen_image = model.predict(src_image)
-# 绘制三张图像
-plot_images(src_image, gen_image, tar_image)
+model = load_model('rev_model_065760.h5')
 
-'''
-# 载入图像，化为灰度图并转换成numpy数组形式
-im1 = np.array(Image.open("des.jpg").convert('L'))
-im2 = np.array(Image.open("out.jpg").convert('L'))
-'''
-# 将元素值恢复为[0,255]
-im1 = gen_image[0] * 127.5 + 127.5
-im2 = tar_image[0] * 127.5 + 127.5
-im1 = im1.astype(np.uint8)
-im2 = im2.astype(np.uint8)
-# print(im1.shape)
-# print(im2.shape)
+for ix in range(num):
+    # 随机选择样例
+    # ix = randint(0, len(X1), 1)
+    # print(ix)
+    src_image, tar_image = X1[ix], X2[ix]
+    # 利用源图像生成图像
+    src_image = src_image[np.newaxis, :]
+    gen_image = model.predict(src_image)
+    # 绘制三张图像
+    #plot_images(src_image, gen_image, tar_image)
 
-# 获取PSNR和SSIM两个指标
-psnr = skimage.measure.compare_psnr(im1, im2, 255)
-ssim = skimage.measure.compare_ssim(im1, im2, data_range=255, multichannel=True)
+    '''
+    # 载入图像，化为灰度图并转换成numpy数组形式
+    im1 = np.array(Image.open("des.jpg").convert('L'))
+    im2 = np.array(Image.open("out.jpg").convert('L'))
+    '''
+    # 将元素值恢复为[0,255]
+    im1 = gen_image[0] * 127.5 + 127.5
+    im2 = tar_image * 127.5 + 127.5
+    im1 = im1.astype(np.uint8)
+    im2 = im2.astype(np.uint8)
+    # print(im1.shape)
+    # print(im2.shape)
 
-print(psnr)
-print(ssim)
+    # 获取PSNR和SSIM两个指标
+    psnr = skimage.measure.compare_psnr(im1, im2, 255)
+    ssim = skimage.measure.compare_ssim(im1, im2, data_range=255, multichannel=True)
 
-imgPredict = im1.flatten() # 预测图像，并展平为一维向量
-imgLabel = im2.flatten() # 目标图像，并展平为一维向量
-metric = SegmentationMetric(256) # 256为像素的不同取值类别数
-metric.addBatch(imgPredict, imgLabel)
-# 获取语义分割的各个指标
-PA = metric.pixelAccuracy()
-CPA = metric.classPixelAccuracy()
-MPA = metric.meanPixelAccuracy()
-MIOU = metric.meanIntersectionOverUnion()
+    print(psnr)
+    print(ssim)
 
-print('PA is : %f' % PA)
-# print('CPA is :') # 列表
-# print(CPA)
-print('MPA is : %f' % MPA)
-print('MIOU is : %f' % MIOU)
+    imgPredict = im1.flatten() # 预测图像，并展平为一维向量
+    imgLabel = im2.flatten() # 目标图像，并展平为一维向量
+    metric = SegmentationMetric(256) # 256为像素的不同取值类别数
+    metric.addBatch(imgPredict, imgLabel)
+    # 获取语义分割的各个指标
+    PA = metric.pixelAccuracy()
+    CPA = metric.classPixelAccuracy()
+    MPA = metric.meanPixelAccuracy()
+    MIOU = metric.meanIntersectionOverUnion()
+
+    print('PA is : %f' % PA)
+    # print('CPA is :') # 列表
+    # print(CPA)
+    print('MPA is : %f' % MPA)
+    print('MIOU is : %f' % MIOU)
+
+    avg_PSNR += psnr
+    avg_SSIM += ssim
+    avg_PA   += PA
+    avg_MPA  += MPA
+    avg_MIOU += MIOU
+
+print(avg_PSNR/num)
+print(avg_SSIM/num)
+print(avg_PA/num)
+print(avg_MPA/num)
+print(avg_MIOU/num)
