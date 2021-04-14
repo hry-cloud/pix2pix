@@ -2,9 +2,23 @@
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array
 from keras.preprocessing.image import load_img
+from numpy import load
 from numpy import expand_dims
+from numpy import vstack
 from matplotlib import pyplot
+from numpy.random import randint
 import matplotlib
+
+# 加载验证集的图像
+def load_real_samples(filename):
+    # 加载压缩数组
+    data = load(filename)
+    # 将数组分开，也即分为两张图像
+    X1, X2 = data['arr_0'], data['arr_1']
+    # 像素值从[0,255]转换为[-1,1]
+    X1 = (X1 - 127.5) / 127.5
+    X2 = (X2 - 127.5) / 127.5
+    return [X1, X2]
 
 # 加载图像
 def load_image(filename, size=(256,256)):
@@ -18,17 +32,54 @@ def load_image(filename, size=(256,256)):
 	pixels = expand_dims(pixels, 0)
 	return pixels
 
+# plot source, generated and target images
+def plot_images(src_img, gen_img1, gen_img2, tar_img):
+	images = vstack((src_img, gen_img1, gen_img2, tar_img))
+	# scale from [-1,1] to [0,1]
+	images = (images + 1) / 2.0
+	titles = ['Source', 'Generated', 'L1_Generated', 'Expected']
+	# plot images row by row
+	for i in range(len(images)):
+		# define subplot
+		pyplot.subplot(1, 4, 1 + i)
+		# turn off axis
+		pyplot.axis('off')
+		# plot raw pixel data
+		pyplot.imshow(images[i])
+		# show title
+		pyplot.title(titles[i])
+	pyplot.savefig('rev_model_out.jpg')
+	pyplot.show()
+
+'''
 # 加载源图像
 src_image = load_image('des.jpg')
 print('Loaded', src_image.shape)
 # 加载模型
-model = load_model('rev_model_087680.h5')
+model = load_model('rev_model/rev_g_model_054800.h5')
 # 从源图像生成图像
 gen_image = model.predict(src_image)
 # 将像素值范围从[-1,1]转换为[0,1]
 gen_image = (gen_image + 1) / 2.0
 # 保存并绘制图像
-matplotlib.image.imsave('rev_out.jpg', gen_image[0])
+matplotlib.image.imsave('rev_out_5.jpg', gen_image[0])
 pyplot.imshow(gen_image[0])
 pyplot.axis('off')
 pyplot.show()
+'''
+
+# 加载数据
+[X2, X1] = load_real_samples('data/maps_val_256.npz')
+print('Loaded', X1.shape, X2.shape)
+# 加载模型
+model1 = load_model('rev_model/rev_g_model_109600.h5')
+model2 = load_model('rev_L1_model/rev_g_model_109600.h5')
+
+# 随机选择样例
+ix = randint(0, len(X1), 1)
+src_image, tar_image = X1[ix], X2[ix]
+# 利用源图像生成图像
+gen_image1 = model1.predict(src_image)
+gen_image2 = model2.predict(src_image)
+# 绘制三张图像
+plot_images(src_image, gen_image1, gen_image2, tar_image)

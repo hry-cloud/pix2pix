@@ -132,11 +132,11 @@ avg_MPA  = 0.0
 avg_MIOU = 0.0
 
 # 加载数据
-[X2, X1] = load_real_samples('maps_val_256.npz')
+[X1, X2] = load_real_samples('data/maps_val_256.npz')
 print('Loaded', X1.shape, X2.shape)
 num = len(X1)
 # 加载模型
-model = load_model('rev_model_065760.h5')
+model = load_model('L1_model/g_model_109600.h5')
 
 for ix in range(num):
     # 随机选择样例
@@ -191,8 +191,13 @@ for ix in range(num):
     avg_MPA  += MPA
     avg_MIOU += MIOU
 
+print('avg_PSNR is :')
 print(avg_PSNR/num)
+print('avg_SSIM is :')
 print(avg_SSIM/num)
+print('avg_PA is %f:')
 print(avg_PA/num)
+print('avg_MPA is %f:')
 print(avg_MPA/num)
+print('avg_MIOU is %f:')
 print(avg_MIOU/num)
