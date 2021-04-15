@@ -56,18 +56,14 @@ def define_discriminator(image_shape):
 	in_target_image = Input(shape=image_shape)
 	merged = Concatenate()([in_src_image, in_target_image])
 	# C64
-	d = Conv2D(64, (1,1), padding='same', kernel_initializer=init)(merged)
+	d = Conv2D(64, (1,1), kernel_initializer=init)(merged)
 	d = LeakyReLU(alpha=0.2)(d)
 	# C128
-	d = Conv2D(128, (1,1), padding='same', kernel_initializer=init)(d)
+	d = Conv2D(128, (1,1), kernel_initializer=init)(d)
 	d = BatchNormalization()(d)
 	d = LeakyReLU(alpha=0.2)(d)
-	# 倒数第二个输出层
-	d = Conv2D(128, (1,1), padding='same', kernel_initializer=init)(d)
-	d = BatchNormalization()(d)
-	d = LeakyReLU(alpha=0.2)(d)
-	# patch输出
-	d = Conv2D(1, (1,1), padding='same', kernel_initializer=init)(d)
+	# pixel输出
+	d = Conv2D(1, (1,1), kernel_initializer=init)(d)
 	patch_out = Activation('sigmoid')(d)
 	# 定义模型
 	model = Model([in_src_image, in_target_image], patch_out)
