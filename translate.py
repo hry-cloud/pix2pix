@@ -32,21 +32,21 @@ def load_image(filename, size=(256,256)):
 	pixels = expand_dims(pixels, 0)
 	return pixels
 
-# plot source, generated and target images
+# 绘制源图像，不同的生成图像以及目标图像
 def plot_images(src_img, gen_img1, gen_img2, tar_img):
 	images = vstack((src_img, gen_img1, gen_img2, tar_img))
-	# scale from [-1,1] to [0,1]
+	# 将像素值从 [-1,1] 改为 [0,1]
 	images = (images + 1) / 2.0
-	titles = ['Source', 'Generated', 'L1_Generated', 'Expected']
-	# plot images row by row
+	titles = ['Source', 'Generated', 'ED_Generated', 'Expected']
+	# 一列一列的画图
 	for i in range(len(images)):
-		# define subplot
+		# 定义相关信息
 		pyplot.subplot(1, 4, 1 + i)
-		# turn off axis
+		# 不显示轴
 		pyplot.axis('off')
-		# plot raw pixel data
+		# 作图
 		pyplot.imshow(images[i])
-		# show title
+		# 显示名称
 		pyplot.title(titles[i])
 	pyplot.savefig('rev_model_out.jpg')
 	pyplot.show()
@@ -72,8 +72,10 @@ pyplot.show()
 [X2, X1] = load_real_samples('data/maps_val_256.npz')
 print('Loaded', X1.shape, X2.shape)
 # 加载模型
-model1 = load_model('rev_model/rev_g_model_109600.h5')
-model2 = load_model('rev_L1_model/rev_g_model_109600.h5')
+model1 = load_model('rev_70x70_model/new_rev_g_model_109600.h5')
+model2 = load_model('rev_ED_model/rev_g_model_109600.h5')
+#model3 = load_model('70x70_model/new_g_model_109600.h5')
+#model4 = load_model('286x286_model/new_g_model_109600.h5')
 
 # 随机选择样例
 ix = randint(0, len(X1), 1)
@@ -81,5 +83,7 @@ src_image, tar_image = X1[ix], X2[ix]
 # 利用源图像生成图像
 gen_image1 = model1.predict(src_image)
 gen_image2 = model2.predict(src_image)
+#gen_image3 = model3.predict(src_image)
+#gen_image4 = model4.predict(src_image)
 # 绘制三张图像
 plot_images(src_image, gen_image1, gen_image2, tar_image)

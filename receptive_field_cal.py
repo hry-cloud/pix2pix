@@ -57,7 +57,3 @@ rf = receptive_field(rf, 4, 2)
 print(rf)
 rf = receptive_field(rf, 4, 2)
 print(rf)
-
-
-
-

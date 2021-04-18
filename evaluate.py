@@ -132,11 +132,11 @@ avg_MPA  = 0.0
 avg_MIOU = 0.0
 
 # 加载数据
-[X1, X2] = load_real_samples('data/maps_val_256.npz')
+[X2, X1] = load_real_samples('data/maps_val_256.npz')
 print('Loaded', X1.shape, X2.shape)
 num = len(X1)
 # 加载模型
-model = load_model('L1_model/g_model_109600.h5')
+model = load_model('rev_70x70_model/new_rev_g_model_109600.h5')
 
 for ix in range(num):
     # 随机选择样例
@@ -166,8 +166,9 @@ for ix in range(num):
     psnr = skimage.measure.compare_psnr(im1, im2, 255)
     ssim = skimage.measure.compare_ssim(im1, im2, data_range=255, multichannel=True)
 
-    print(psnr)
-    print(ssim)
+    # 输出PSNR和SSIM的值
+    print('PSNR is : %f' % psnr)
+    print('SSIM is : %f' % ssim)
 
     imgPredict = im1.flatten() # 预测图像，并展平为一维向量
     imgLabel = im2.flatten() # 目标图像，并展平为一维向量
@@ -185,19 +186,21 @@ for ix in range(num):
     print('MPA is : %f' % MPA)
     print('MIOU is : %f' % MIOU)
 
+    # 将该轮得到的所有图像指标与相应累加量相加
     avg_PSNR += psnr
     avg_SSIM += ssim
     avg_PA   += PA
     avg_MPA  += MPA
     avg_MIOU += MIOU
 
-print('avg_PSNR is :')
+# 输出最终各项评价指标的平均量
+print('avg_PSNR is:')
 print(avg_PSNR/num)
 print('avg_SSIM is :')
 print(avg_SSIM/num)
-print('avg_PA is %f:')
+print('avg_PA is:')
 print(avg_PA/num)
-print('avg_MPA is %f:')
+print('avg_MPA is:')
 print(avg_MPA/num)
-print('avg_MIOU is %f:')
+print('avg_MIOU is:')
 print(avg_MIOU/num)

@@ -18,6 +18,7 @@ from keras.models import load_model
 from matplotlib import pyplot
 
 # 定义判别器模型
+# 70x70 Patch GAN
 def define_discriminator(image_shape):
 	# 权重初始化
 	init = RandomNormal(stddev=0.02)
@@ -25,7 +26,7 @@ def define_discriminator(image_shape):
 	in_src_image = Input(shape=image_shape)
 	# 目标图像输入
 	in_target_image = Input(shape=image_shape)
-	# 将两个图像拼接在一起
+	# 将图像在通道尺度上连接
 	merged = Concatenate()([in_src_image, in_target_image])
 	# C64
 	d = Conv2D(64, (4,4), strides=(2,2), padding='same', kernel_initializer=init)(merged)
@@ -194,13 +195,12 @@ def summarize_performance(step, g_model, dataset, n_samples=3):
 		pyplot.axis('off')
 		pyplot.imshow(X_realB[i])
 	# 将绘制的图保存到文件
-	filename1 = 'plot_%06d.png' % (step+1)
+	filename1 = '70x70_model/new_plot_%06d.png' % (step+1)
 	pyplot.savefig(filename1)
 	pyplot.close()
 	# 保存生成器模型
-	filename2 = 'g_model_%06d.h5' % (step+1)
+	filename2 = '70x70_model/new_g_model_%06d.h5' % (step+1)
 	g_model.save(filename2)
-	# filename3 = 'd_model_%06d.h5' % (step+1)
 	# d_model.save(filename3)
 	print('>Saved: %s and %s' % (filename1, filename2))
 
@@ -233,7 +233,7 @@ def train(d_model, g_model, gan_model, dataset, n_epochs=100, n_batch=1):
 			summarize_performance(i, g_model, dataset)
 
 # 加载图像数据
-dataset = load_real_samples('maps_train_256.npz')
+dataset = load_real_samples('data/maps_train_256.npz')
 print('Loaded', dataset[0].shape, dataset[1].shape)
 # 基于加载的数据集来定义输入的形状
 image_shape = dataset[0].shape[1:]
