@@ -67,7 +67,10 @@ class SegmentationMetric(object):
     def meanIntersectionOverUnion(self):
         # 取对角元素的值，返回列表
         intersection = np.diag(self.confusionMatrix)
-        union = np.sum(self.confusionMatrix, axis=1) + np.sum(self.confusionMatrix, axis=0) - np.diag(self.confusionMatrix) # axis = 1表示混淆矩阵行的值，返回列表； axis = 0表示取混淆矩阵列的值，返回列表
+        union = np.sum(self.confusionMatrix, axis=1) + \
+                np.sum(self.confusionMatrix, axis=0) - \
+                np.diag(self.confusionMatrix) # axis = 1表示取混淆矩阵行的值，返回列表
+                                              # axis = 0表示取混淆矩阵列的值，返回列表
         # 返回列表，其值为各个类别的IoU
         IoU = intersection / union
         # 求各类别IoU的平均
